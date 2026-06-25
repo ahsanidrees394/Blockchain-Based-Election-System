@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Intikhabaat · Pakistan Election DApp</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu:wght@400;700&family=Cinzel:wght@700;900&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,500;0,9..40,700;1,9..40,300&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- ░░ BACKGROUND CANVAS ░░ -->
+<canvas id="bgCanvas"></canvas>
+
+<!-- ░░ NAV ░░ -->
+<nav id="navbar">
+  <div class="nav-brand">
+    <span class="nav-crescent">☽</span>
+    <div class="nav-title-block">
+      <span class="nav-urdu">انتخابات</span>
+      <span class="nav-en">INTIKHABAAT</span>
+    </div>
+  </div>
+  <div class="nav-status">
+    <div class="status-dot" id="statusDot"></div>
+    <span id="statusText">Not Connected</span>
+  </div>
+  <button class="btn-connect" id="connectBtn" onclick="connectWallet()">
+    <span>Connect Wallet</span>
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
+  </button>
+</nav>
+
+<!-- ░░ HERO ░░ -->
+<header id="hero">
+  <div class="hero-eyebrow">Blockchain-Powered · Transparent · Tamper-Proof</div>
+  <h1 class="hero-title">
+    <span class="ht-line1">Pakistan's</span>
+    <span class="ht-line2">Democratic</span>
+    <span class="ht-line3">Future</span>
+  </h1>
+  <p class="hero-sub">A decentralised election platform where every vote is immutably recorded on Ethereum. No manipulation. No fraud. Just democracy.</p>
+  <div class="hero-ctas">
+    <button class="cta-primary" onclick="showPanel('voter')">🗳 Register as Voter</button>
+    <button class="cta-secondary" onclick="showPanel('candidate')">🏛 Stand as Candidate</button>
+  </div>
+  <div class="hero-stats" id="heroStats">
+    <div class="stat"><span id="statVoters">—</span><label>Registered Voters</label></div>
+    <div class="stat"><span id="statCandidates">—</span><label>Candidates</label></div>
+    <div class="stat"><span id="statVotes">—</span><label>Votes Cast</label></div>
+  </div>
+</header>
+
+<!-- ░░ PROBLEMS & SOLUTIONS ░░ -->
+<section id="problems">
+  <div class="section-tag">The Problem Space</div>
+  <h2 class="section-title">Why Pakistan Needs a Blockchain Election</h2>
+  <div class="ps-grid">
+    <div class="problem-card">
+      <div class="pc-icon">⚠</div>
+      <h3>Ballot Tampering</h3>
+      <p>Paper ballots are physically altered, destroyed, or replaced. Rigging at polling stations is historically documented.</p>
+      <div class="pc-arrow">→</div>
+      <div class="solution-pill">Immutable blockchain records — every vote cryptographically sealed.</div>
+    </div>
+    <div class="problem-card">
+      <div class="pc-icon">👤</div>
+      <h3>Ghost Voters</h3>
+      <p>Fake CNIC entries allow individuals to vote multiple times under different identities.</p>
+      <div class="pc-arrow">→</div>
+      <div class="solution-pill">CNIC hashed on-chain. One CNIC = One vote. Forever.</div>
+    </div>
+    <div class="problem-card">
+      <div class="pc-icon">🔒</div>
+      <h3>Lack of Transparency</h3>
+      <p>Counting happens behind closed doors. Results are announced without verifiable audit trails.</p>
+      <div class="pc-arrow">→</div>
+      <div class="solution-pill">Real-time, public vote count on Ethereum. Anyone can verify.</div>
+    </div>
+    <div class="problem-card">
+      <div class="pc-icon">📋</div>
+      <h3>Candidate Vetting</h3>
+      <p>Unqualified or disqualified candidates participate due to weak verification (Article 62/63).</p>
+      <div class="pc-arrow">→</div>
+      <div class="solution-pill">Smart contract enforces age, nationality & criminal record checks.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ░░ PANELS ░░ -->
+<section id="panels">
+
+  <!-- TAB BAR -->
+  <div class="tab-bar">
+    <button class="tab active" data-panel="voter" onclick="showPanel('voter')">🗳 Voter</button>
+    <button class="tab" data-panel="candidate" onclick="showPanel('candidate')">🏛 Candidate</button>
+    <button class="tab" data-panel="vote" onclick="showPanel('vote')">☑ Cast Vote</button>
+    <button class="tab" data-panel="results" onclick="showPanel('results')">📊 Results</button>
+    <button class="tab" data-panel="admin" onclick="showPanel('admin')">⚙ Admin</button>
+  </div>
+
+  <!-- ── VOTER REGISTRATION ── -->
+  <div class="panel active" id="panel-voter">
+    <div class="panel-header">
+      <div class="ph-badge">Step 1 → CNIC on Blockchain → Step 2 → Vote</div>
+      <h2>Voter Registration</h2>
+      <p>Register your CNIC on the blockchain. You only need to do this once.</p>
+    </div>
+    <div class="form-grid">
+      <div class="field">
+        <label>CNIC Number <span class="req">*</span></label>
+        <input type="text" id="v-cnic" placeholder="3520212345678" maxlength="13" oninput="formatCNIC(this,'v-cnic-display')" />
+        <span class="field-hint">13 digits, no dashes</span>
+        <div class="cnic-visual" id="v-cnic-display">_ _ _ _ _ _ _ _ _ _ _ _ _</div>
+      </div>
+      <div class="field">
+        <label>Full Name <span class="req">*</span></label>
+        <input type="text" id="v-name" placeholder="Muhammad Ahmed Khan" />
+      </div>
+      <div class="field">
+        <label>Age <span class="req">*</span></label>
+        <input type="number" id="v-age" placeholder="25" min="18" max="120" />
+        <span class="field-hint">Must be 18 or older</span>
+      </div>
+      <div class="field">
+        <label>Province <span class="req">*</span></label>
+        <select id="v-province">
+          <option value="">— Select Province —</option>
+          <option>Punjab</option>
+          <option>Sindh</option>
+          <option>Khyber Pakhtunkhwa</option>
+          <option>Balochistan</option>
+          <option>Gilgit-Baltistan</option>
+          <option>Azad Jammu & Kashmir</option>
+          <option>Islamabad Capital Territory</option>
+        </select>
+      </div>
+      <div class="field full">
+        <label>Constituency <span class="req">*</span></label>
+        <input type="text" id="v-constituency" placeholder="e.g., NA-123 Lahore-I" />
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn-primary" onclick="registerVoter()">
+        <span>Register on Blockchain</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+    <div class="tx-status" id="voter-tx"></div>
+  </div>
+
+  <!-- ── CANDIDATE REGISTRATION ── -->
+  <div class="panel" id="panel-candidate">
+    <div class="panel-header">
+      <div class="ph-badge">Article 62 & 63 · Constitution of Pakistan</div>
+      <h2>Candidate Registration</h2>
+      <p>All fields are stored immutably on-chain. Incomplete or false information will disqualify your candidacy.</p>
+    </div>
+
+    <h3 class="form-section-title">Personal Information</h3>
+    <div class="form-grid">
+      <div class="field">
+        <label>CNIC Number <span class="req">*</span></label>
+        <input type="text" id="c-cnic" placeholder="3520212345678" maxlength="13" oninput="formatCNIC(this,'c-cnic-display')" />
+        <div class="cnic-visual" id="c-cnic-display">_ _ _ _ _ _ _ _ _ _ _ _ _</div>
+      </div>
+      <div class="field">
+        <label>Full Name <span class="req">*</span></label>
+        <input type="text" id="c-name" placeholder="Muhammad Ahmed Khan" />
+      </div>
+      <div class="field">
+        <label>Age <span class="req">*</span></label>
+        <input type="number" id="c-age" placeholder="30" min="25" max="120" />
+        <span class="field-hint">Minimum 25 years (Constitution Art. 62)</span>
+      </div>
+      <div class="field">
+        <label>Nationality <span class="req">*</span></label>
+        <select id="c-nationality">
+          <option value="Pakistani">Pakistani</option>
+        </select>
+        <span class="field-hint">Must be Pakistani national</span>
+      </div>
+      <div class="field">
+        <label>Religion <span class="req">*</span></label>
+        <input type="text" id="c-religion" placeholder="e.g., Islam" />
+        <span class="field-hint">Required per Article 62(1)(d)</span>
+      </div>
+      <div class="field">
+        <label>Education Level <span class="req">*</span></label>
+        <select id="c-education">
+          <option value="">— Select —</option>
+          <option>Matric</option>
+          <option>Intermediate</option>
+          <option>Graduation</option>
+          <option>Masters</option>
+          <option>PhD</option>
+        </select>
+      </div>
+    </div>
+
+    <h3 class="form-section-title">Electoral Information</h3>
+    <div class="form-grid">
+      <div class="field">
+        <label>Province <span class="req">*</span></label>
+        <select id="c-province">
+          <option value="">— Select Province —</option>
+          <option>Punjab</option>
+          <option>Sindh</option>
+          <option>Khyber Pakhtunkhwa</option>
+          <option>Balochistan</option>
+          <option>Gilgit-Baltistan</option>
+          <option>Azad Jammu & Kashmir</option>
+          <option>Islamabad Capital Territory</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Constituency <span class="req">*</span></label>
+        <input type="text" id="c-constituency" placeholder="e.g., NA-123 Lahore-I" />
+      </div>
+      <div class="field">
+        <label>Political Party <span class="req">*</span></label>
+        <input type="text" id="c-party" placeholder="e.g., Pakistan Tehreek-e-Insaf" />
+      </div>
+    </div>
+
+    <h3 class="form-section-title">Manifesto & Declaration</h3>
+    <div class="form-grid">
+      <div class="field full">
+        <label>Manifesto / Policy Statement <span class="req">*</span></label>
+        <textarea id="c-manifesto" rows="4" placeholder="Briefly describe your key policy objectives and vision for your constituency…"></textarea>
+      </div>
+      <div class="field full">
+        <label class="checkbox-label">
+          <input type="checkbox" id="c-criminal" />
+          <span class="checkmark"></span>
+          I declare that I have <strong>NO</strong> criminal record (required per Article 62/63)
+        </label>
+      </div>
+      <div class="field full">
+        <label class="checkbox-label">
+          <input type="checkbox" id="c-confirm" />
+          <span class="checkmark"></span>
+          I confirm all information is truthful. False declarations are a criminal offense.
+        </label>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button class="btn-primary" onclick="registerCandidate()">
+        <span>Submit Candidacy on Blockchain</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+    <div class="tx-status" id="candidate-tx"></div>
+  </div>
+
+  <!-- ── CAST VOTE ── -->
+  <div class="panel" id="panel-vote">
+    <div class="panel-header">
+      <div class="ph-badge">One CNIC · One Vote · Forever Recorded</div>
+      <h2>Cast Your Vote</h2>
+      <p>Enter your CNIC and choose a candidate from your constituency. This action is irreversible.</p>
+    </div>
+    <div class="form-grid">
+      <div class="field">
+        <label>Your CNIC <span class="req">*</span></label>
+        <input type="text" id="vote-cnic" placeholder="3520212345678" maxlength="13" oninput="formatCNIC(this,'vote-cnic-display')" />
+        <div class="cnic-visual" id="vote-cnic-display">_ _ _ _ _ _ _ _ _ _ _ _ _</div>
+      </div>
+      <div class="field full">
+        <button class="btn-secondary" onclick="loadCandidates()">🔍 Load Approved Candidates</button>
+      </div>
+    </div>
+
+    <div id="candidates-container" class="candidates-grid"></div>
+
+    <div class="selected-candidate" id="selectedInfo" style="display:none">
+      <div class="sc-label">Selected Candidate</div>
+      <div id="selectedName" class="sc-name"></div>
+      <button class="btn-primary btn-vote" onclick="castVote()">
+        <span>Cast Vote — Final & Irreversible</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+      </button>
+    </div>
+    <div class="tx-status" id="vote-tx"></div>
+  </div>
+
+  <!-- ── RESULTS ── -->
+  <div class="panel" id="panel-results">
+    <div class="panel-header">
+      <div class="ph-badge">Live · On-Chain · Verifiable</div>
+      <h2>Election Results</h2>
+      <p>Real-time vote counts pulled directly from the Ethereum blockchain.</p>
+    </div>
+    <div class="results-actions">
+      <button class="btn-secondary" onclick="loadResults()">🔄 Refresh Results</button>
+    </div>
+    <div id="results-container" class="results-list"></div>
+  </div>
+
+  <!-- ── ADMIN ── -->
+  <div class="panel" id="panel-admin">
+    <div class="panel-header">
+      <div class="ph-badge">Election Commission · Admin Only</div>
+      <h2>Election Administration</h2>
+      <p>Connected wallet must be the contract deployer (admin).</p>
+    </div>
+    <div class="admin-grid">
+      <div class="admin-card">
+        <h3>Create Election</h3>
+        <div class="field">
+          <label>Election Name</label>
+          <input type="text" id="a-name" placeholder="General Election 2024" />
+        </div>
+        <div class="field">
+          <label>Duration (hours)</label>
+          <input type="number" id="a-duration" placeholder="24" />
+        </div>
+        <button class="btn-primary" onclick="createElection()">Start Election</button>
+      </div>
+      <div class="admin-card">
+        <h3>Approve Candidate</h3>
+        <div class="field">
+          <label>Candidate ID</label>
+          <input type="number" id="a-candidate-id" placeholder="1" />
+        </div>
+        <button class="btn-primary" onclick="approveCandidate()">Approve</button>
+      </div>
+      <div class="admin-card">
+        <h3>End Election</h3>
+        <p class="admin-warning">⚠ This action is final and cannot be undone.</p>
+        <button class="btn-danger" onclick="endElection()">End Election Now</button>
+      </div>
+    </div>
+    <div class="tx-status" id="admin-tx"></div>
+  </div>
+
+</section>
+
+<!-- ░░ FOOTER ░░ -->
+<footer>
+  <div class="footer-brand">
+    <span class="nav-crescent">☽</span> Intikhabaat · Pakistan Election DApp
+  </div>
+  <p>Built on Ethereum · Smart Contract Verified · Open Source</p>
+  <p class="footer-note">This is a demonstration DApp. For production use, complete a security audit and comply with NADRA & ECP regulations.</p>
+</footer>
+
+<!-- ░░ TOAST ░░ -->
+<div class="toast" id="toast"></div>
+
+<!-- ░░ LOADING OVERLAY ░░ -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loader-ring"></div>
+  <div class="loader-text" id="loaderText">Processing transaction…</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
